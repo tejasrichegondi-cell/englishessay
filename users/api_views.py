@@ -1,0 +1,126 @@
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import UserRegistrationModel
+from .serializers import UserRegistrationSerializer, UserLoginSerializer
+import os
+import re
+import numpy as np
+from PIL import Image
+import pytesseract
+from django.conf import settings
+from gensim.models import KeyedVectors
+from tensorflow.keras.models import load_model
+from nltk.corpus import stopwords
+import pandas as pd
+
+# OCR PATH (Windows Only)
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
+# BASE DIRECTORY
+BASE_DIR = settings.BASE_DIR
+
+# Load models only once (lazy loading or at module level)
+word2vec_model = None
+lstm_model = None
+
+def get_models():
+    global word2vec_model, lstm_model
+    if word2vec_model is None:
+        word2vec_model = KeyedVectors.load_word2vec_format(
+            os.path.join(BASE_DIR, "word2vecmodel.bin"),
+            binary=True
+        )
+    if lstm_model is None:
+        lstm_model = load_model(
+            os.path.join(BASE_DIR, "final_lstm.h5"),
+            compile=False
+        )
+    return word2vec_model, lstm_model
+
+class RegisterAPIView(APIView):
+    def post(self, request):
+        serializer = UserRegistrationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Successfully registered. Please wait for admin activation."}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class LoginAPIView(APIView):
+    def post(self, request):
+        serializer = UserLoginSerializer(data=request.data)
+        if serializer.is_valid():
+            loginid = serializer.validated_data['loginid']
+            pswd = serializer.validated_data['pswd']
+            try:
+                user = UserRegistrationModel.objects.get(loginid=loginid, password=pswd)
+                if user.status == "activated":
+                    return Response({
+                        "id": user.id,
+                        "name": user.name,
+                        "loginid": user.loginid,
+                        "email": user.email,
+                        "status": user.status
+                    }, status=status.HTTP_200_OK)
+                else:
+                    return Response({"error": "Your account is not activated yet."}, status=status.HTTP_403_FORBIDDEN)
+            except UserRegistrationModel.DoesNotExist:
+                return Response({"error": "Invalid Login ID or Password."}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class PredictionAPIView(APIView):
+    def post(self, request):
+        final_text = request.data.get("final_text")
+        image_file = request.FILES.get("essay_image")
+        
+        if image_file:
+            try:
+                img = Image.open(image_file)
+                final_text = pytesseract.image_to_string(img)
+            except Exception as e:
+                return Response({"error": f"Image processing error: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not final_text or len(final_text.strip()) <= 20:
+            return Response({"error": "Essay too short or empty."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            w2v, lstm = get_models()
+            stop_words = set(stopwords.words("english"))
+            text = re.sub("[^A-Za-z]", " ", final_text)
+            words = text.lower().split()
+            words = [w for w in words if w not in stop_words]
+
+            vec = np.zeros((300,), dtype="float32")
+            count = 0
+            for w in words:
+                if w in w2v.key_to_index:
+                    vec += w2v[w]
+                    count += 1
+
+            if count == 0:
+                return Response({"error": "No valid words found."}, status=status.HTTP_400_BAD_REQUEST)
+            
+            vec /= count
+            vec = vec.reshape(1, 1, 300)
+            preds = lstm.predict(vec, verbose=0)
+            score = round(float(preds[0][0]))
+            
+            return Response({
+                "score": score,
+                "extracted_text": final_text if image_file else None
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response({"error": f"Prediction error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class DatasetAPIView(APIView):
+    def get(self, request):
+        try:
+            df = pd.read_csv(os.path.join(BASE_DIR, "media/training_set_rel3.tsv"),
+                             sep='\t', encoding='ISO-8859-1')
+            df.dropna(axis=1, inplace=True)
+            # Return first 20 rows
+            data = df.head(20).to_dict(orient='records')
+            return Response(data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

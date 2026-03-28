@@ -1,0 +1,4 @@
+﻿env: load .env
+env: export REACT_NATIVE_PACKAGER_HOSTNAME
+Running 17 checks on your project...
+17/17 checks passed. No issues detected!

@@ -1,25 +1,28 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim
+# Use a more robust base image
+FROM python:3.9
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# Install system dependencies for Tesseract OCR and other libraries
-RUN apt-get update && apt-get install -y \
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
     tesseract-ocr \
     libtesseract-dev \
     libgl1-mesa-glx \
     libglib2.0-0 \
     gcc \
-    python3-dev \
-    && apt-get clean
+    g++ \
+    libpq-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set work directory
 WORKDIR /app
 
-# Install Python dependencies
+# Upgrade pip and install Python dependencies
 COPY requirements.txt /app/
+RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Download NLTK data

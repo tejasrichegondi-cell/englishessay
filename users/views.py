@@ -287,9 +287,17 @@ import os
 # =========================
 # OCR PATH (Windows Only)
 # =========================
+# =========================
+# OCR PATH (Cross-platform)
+# =========================
 import pytesseract
+import os
 
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+if os.name == 'nt':
+    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+else:
+    # On Linux (Render/Railway), tesseract is usually in the PATH
+    pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
 
 
 # =========================

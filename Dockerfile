@@ -35,7 +35,7 @@ COPY . /app/
 RUN python manage.py collectstatic --noinput
 
 # Expose port
-EXPOSE 8000
+EXPOSE 8080
 
 # Start Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "Automatic_English_Essay_Scoring_Algorithm_Based_On_Ml.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "Automatic_English_Essay_Scoring_Algorithm_Based_On_Ml.wsgi:application"]

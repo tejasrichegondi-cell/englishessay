@@ -1,4 +1,4 @@
-# Use a more stable stable image (Bullseye)
+# Use a stable Debian base
 FROM python:3.9-bullseye
 
 # Set environment variables
@@ -6,6 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 # Install system dependencies
+# Changed 'libgl1-mesa-glx' to 'libgl1' for compatibility
 RUN apt-get update && apt-get install -y --no-install-recommends \
     tesseract-ocr \
     libtesseract-dev \
@@ -34,7 +35,7 @@ COPY . /app/
 # Collect static files
 RUN python manage.py collectstatic --noinput
 
-# Expose port
+# Expose port (matches Railway manual setting)
 EXPOSE 8080
 
 # Start Gunicorn

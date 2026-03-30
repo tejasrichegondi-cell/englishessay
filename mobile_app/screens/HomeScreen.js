@@ -14,7 +14,7 @@ import {
 import axios from 'axios';
 import { StatusBar } from 'expo-status-bar';
 
-const BACKEND_URL = "https://fine-memes-live.loca.lt"; 
+const BACKEND_URL = "https://englishessay-production.up.railway.app"; 
 
 export default function HomeScreen({ navigation, route }) {
   const [essayText, setEssayText] = useState('');
@@ -36,8 +36,7 @@ export default function HomeScreen({ navigation, route }) {
         final_text: essayText
       }, {
         headers: {
-          'Content-Type': 'application/json',
-          'bypass-tunnel-reminder': 'true'
+          'Content-Type': 'application/json'
         }
       });
 
@@ -114,6 +113,24 @@ export default function HomeScreen({ navigation, route }) {
             <Text style={styles.resultHint}>Predicted Score from LSTM Model</Text>
           </View>
         )}
+
+        <View style={styles.menuGrid}>
+          <TouchableOpacity 
+            style={[styles.menuItem, { backgroundColor: '#1E293B', borderLeftColor: '#38BDF8', borderLeftWidth: 4 }]} 
+            onPress={() => navigation.navigate('Dataset')}
+          >
+            <Text style={styles.menuIcon}>📂</Text>
+            <Text style={styles.menuText}>Dataset</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[styles.menuItem, { backgroundColor: '#1E293B', borderLeftColor: '#10B981', borderLeftWidth: 4 }]} 
+            onPress={() => navigation.navigate('Training')}
+          >
+            <Text style={styles.menuIcon}>📊</Text>
+            <Text style={styles.menuText}>Training</Text>
+          </TouchableOpacity>
+        </View>
 
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Text style={styles.logoutButtonText}>LOGOUT</Text>
@@ -240,5 +257,27 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     letterSpacing: 1,
+  },
+  menuGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginTop: 20,
+  },
+  menuItem: {
+    width: '48%',
+    padding: 15,
+    borderRadius: 12,
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  menuIcon: {
+    fontSize: 20,
+    marginRight: 10,
+  },
+  menuText: {
+    color: '#F1F5F9',
+    fontWeight: 'bold',
+    fontSize: 14,
   },
 });

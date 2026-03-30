@@ -14,7 +14,7 @@ import {
 import axios from 'axios';
 import { StatusBar } from 'expo-status-bar';
 
-const BACKEND_URL = "https://fine-memes-live.loca.lt"; 
+const BACKEND_URL = "https://englishessay-production.up.railway.app"; 
 // Note: We'll add headers in the axios calls
 
 export default function RegisterScreen({ navigation }) {
@@ -40,9 +40,7 @@ export default function RegisterScreen({ navigation }) {
 
     setLoading(true);
     try {
-      const response = await axios.post(`${BACKEND_URL}/api/register/`, formData, {
-        headers: { 'bypass-tunnel-reminder': 'true' }
-      });
+      const response = await axios.post(`${BACKEND_URL}/api/register/`, formData);
 
       if (response.status === 201) {
         Alert.alert("Registration Successful", "Please wait for administrator activation before logging in.", [

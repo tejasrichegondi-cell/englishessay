@@ -3,7 +3,13 @@ from users.forms import UserRegistrationForm
 
 
 def index(request):
-    return render(request, 'index.html', {})
+    try:
+        return render(request, 'index.html', {})
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        from django.http import HttpResponse
+        return HttpResponse(f"Error: {str(e)}", status=500)
 
 def AdminLogin(request):
     return render(request, 'AdminLogin.html', {})

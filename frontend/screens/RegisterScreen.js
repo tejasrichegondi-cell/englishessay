@@ -14,7 +14,7 @@ import {
 import axios from 'axios';
 import { StatusBar } from 'expo-status-bar';
 
-const BACKEND_URL = "https://englishessay-production.up.railway.app"; 
+import { BACKEND_URL } from '../apiConfig';
 // Note: We'll add headers in the axios calls
 
 export default function RegisterScreen({ navigation }) {
@@ -43,9 +43,14 @@ export default function RegisterScreen({ navigation }) {
       const response = await axios.post(`${BACKEND_URL}/api/register/`, formData);
 
       if (response.status === 201) {
-        Alert.alert("Registration Successful", "Please wait for administrator activation before logging in.", [
-          { text: "OK", onPress: () => navigation.navigate('Login') }
-        ]);
+        if (Platform.OS === 'web') {
+          alert("Registration Successful! Please wait for administrator activation before logging in.");
+          navigation.navigate('Login');
+        } else {
+          Alert.alert("Registration Successful", "Please wait for administrator activation before logging in.", [
+            { text: "OK", onPress: () => navigation.navigate('Login') }
+          ]);
+        }
       }
     } catch (error) {
       console.error(error);

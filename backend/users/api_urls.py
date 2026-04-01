@@ -10,4 +10,5 @@ urlpatterns = [
     path('admin/users/', AdminUsersListAPIView.as_view(), name='api_admin_users'),
     path('admin/activate/', UserActivateAPIView.as_view(), name='api_admin_activate'),
     path('training/', TrainingAPIView.as_view(), name='api_training'),
+    path('health/', lambda r: Response({"status": "ok"}), name='api_health'),
 ]

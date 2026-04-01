@@ -5,16 +5,22 @@ import {
   View, 
   TouchableOpacity, 
   ScrollView,
-  Alert
+  Alert,
+  Platform
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 
 export default function AdminHomeScreen({ navigation }) {
   const handleLogout = () => {
-    Alert.alert("Logout", "Logout from admin panel?", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Logout", onPress: () => navigation.replace('Login') }
-    ]);
+    if (Platform.OS === 'web') {
+      const confirmLogout = window.confirm("Are you sure you want to logout?");
+      if (confirmLogout) navigation.replace('Login');
+    } else {
+      Alert.alert("Logout", "Logout from admin panel?", [
+        { text: "Cancel", style: "cancel" },
+        { text: "Logout", onPress: () => navigation.replace('Login') }
+      ]);
+    }
   };
 
   const AdminButton = ({ title, subtitle, icon, onPress, color }) => (

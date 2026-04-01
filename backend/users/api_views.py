@@ -49,6 +49,8 @@ class RegisterAPIView(APIView):
                 return Response({"message": "Successfully registered. Please wait for admin activation."}, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class LoginAPIView(APIView):
@@ -74,6 +76,8 @@ class LoginAPIView(APIView):
                     return Response({"error": "Invalid Login ID or Password."}, status=status.HTTP_401_UNAUTHORIZED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class PredictionAPIView(APIView):

@@ -11,7 +11,7 @@ import {
 import axios from 'axios';
 import { StatusBar } from 'expo-status-bar';
 
-const BACKEND_URL = "https://englishessay-production.up.railway.app";
+import { BACKEND_URL } from '../apiConfig';
 
 export default function DatasetScreen({ navigation }) {
   const [data, setData] = useState([]);

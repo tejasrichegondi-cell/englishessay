@@ -33,6 +33,7 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 media/
+!media/training_set_rel3.tsv
 
 # Node
 node_modules/
@@ -49,8 +50,8 @@ Thumbs.db
 .idea/
 .vscode/
 
-# Expo / React Native
-mobile_app/.expo/
-mobile_app/node_modules/
-mobile_app/web-build/
-mobile_app/dist/
+# Frontend / Expo
+frontend/.expo/
+frontend/node_modules/
+frontend/web-build/
+frontend/dist/

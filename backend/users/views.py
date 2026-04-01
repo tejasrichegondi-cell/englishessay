@@ -307,18 +307,24 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 # =========================
-# Load models only once
+# Lazy-load models
 # =========================
+_word2vec_model = None
+_lstm_model = None
 
-word2vec_model = KeyedVectors.load_word2vec_format(
-    os.path.join(BASE_DIR, "word2vecmodel.bin"),
-    binary=True
-)
-
-lstm_model = load_model(
-    os.path.join(BASE_DIR, "final_lstm.h5"),
-    compile=False
-)
+def get_prediction_models():
+    global _word2vec_model, _lstm_model
+    if _word2vec_model is None:
+        _word2vec_model = KeyedVectors.load_word2vec_format(
+            os.path.join(BASE_DIR, "word2vecmodel.bin"),
+            binary=True
+        )
+    if _lstm_model is None:
+        _lstm_model = load_model(
+            os.path.join(BASE_DIR, "final_lstm.h5"),
+            compile=False
+        )
+    return _word2vec_model, _lstm_model
 
 
 # =========================
@@ -369,9 +375,10 @@ def prediction(request):
             vec = np.zeros((300,), dtype="float32")
             count = 0
 
+            w2v, lstm = get_prediction_models()
             for w in words:
-                if w in word2vec_model.key_to_index:
-                    vec += word2vec_model[w]
+                if w in w2v.key_to_index:
+                    vec += w2v[w]
                     count += 1
 
             if count == 0:
@@ -380,7 +387,7 @@ def prediction(request):
                 vec /= count
                 vec = vec.reshape(1, 1, 300)
 
-                preds = lstm_model.predict(vec, verbose=0)
+                preds = lstm.predict(vec, verbose=0)
                 score = str(round(float(preds[0][0])))
 
         except Exception as e:

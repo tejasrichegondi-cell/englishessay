@@ -8,7 +8,7 @@ matplotlib
 scikit-learn
 nltk
 gensim
-tensorflow-cpu
+tensorflow-cpu==2.15.0
 Pillow
 pytesseract
 gunicorn

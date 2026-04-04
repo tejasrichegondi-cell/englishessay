@@ -150,7 +150,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://englishessay-production.up.railway.app', 
+    'https://englishessay-production-234d.up.railway.app', 
     'https://*.railway.app',
     'http://localhost:8081',
     'http://localhost:19006',

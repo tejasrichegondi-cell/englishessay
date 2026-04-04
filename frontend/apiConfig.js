@@ -9,16 +9,16 @@ import { Platform } from 'react-native';
  */
 
 // CHANGE THIS TO YOUR RAILWAY URL FOR PRODUCTION
-const PRODUCTION_URL = "https://englishessay-production.up.railway.app";
+const PRODUCTION_URL = "https://englishessay-production-234d.up.railway.app";
 
 // YOUR CURRENT LOCAL IP (found via ipconfig)
 const LOCAL_IP = "192.168.137.135";
 
-// LOCAL TESTING - Un-comment this out when using Railway
-export const BACKEND_URL = Platform.select({
-  web: "http://localhost:8000",
-  default: `http://${LOCAL_IP}:8000`
-});
-
 // PRODUCTION - This line is now active
-// export const BACKEND_URL = PRODUCTION_URL;
+export const BACKEND_URL = PRODUCTION_URL;
+
+// LOCAL TESTING - Comment this out when using Railway
+// export const BACKEND_URL = Platform.select({
+//   web: "http://localhost:8000",
+//   default: `http://${LOCAL_IP}:8000`
+// });

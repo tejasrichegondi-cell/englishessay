@@ -108,8 +108,19 @@ class PredictionAPIView(APIView):
             return Response({"error": "Essay too short or empty."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            w2v, lstm = get_models()
-            stop_words = set(stopwords.words("english"))
+            # Track which phase fails
+            try:
+                w2v, lstm = get_models()
+            except Exception as model_err:
+                import traceback
+                traceback.print_exc()
+                return Response({"error": f"Model Loading Error: {str(model_err)} - Make sure models are in backend root."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            try:
+                stop_words = set(stopwords.words("english"))
+            except Exception as nltk_err:
+                return Response({"error": f"NLTK Error: {str(nltk_err)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
             text = re.sub("[^A-Za-z]", " ", final_text)
             words = text.lower().split()
             words = [w for w in words if w not in stop_words]
@@ -122,12 +133,17 @@ class PredictionAPIView(APIView):
                     count += 1
 
             if count == 0:
-                return Response({"error": "No valid words found."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "No valid words found in the essay."}, status=status.HTTP_400_BAD_REQUEST)
             
             vec /= count
+            # Adjust shape if needed - common LSTM inputs are (batch, timesteps, features)
             vec = vec.reshape(1, 1, 300)
-            preds = lstm.predict(vec, verbose=0)
-            score = round(float(preds[0][0]))
+            
+            try:
+                preds = lstm.predict(vec, verbose=0)
+                score = round(float(preds[0][0]))
+            except Exception as predict_err:
+                return Response({"error": f"LSTM Prediction Error: {str(predict_err)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
             return Response({
                 "score": score,
@@ -137,7 +153,7 @@ class PredictionAPIView(APIView):
         except Exception as e:
             import traceback
             traceback.print_exc()
-            return Response({"error": f"Prediction error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": f"General Prediction error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class DatasetAPIView(APIView):
     def get(self, request):
